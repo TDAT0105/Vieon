@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Vieon.Controllers.Design_Pattern.Decorator;
 using Vieon.Models;
 
 namespace Vieon.Controllers
@@ -23,7 +24,9 @@ namespace Vieon.Controllers
         // GET: Users/Details/5
         public ActionResult Details(int? id)
         {
-            if (id == null)
+            var userDetail = new UserDecorator(db);
+            
+            if (!userDetail.Details(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -50,8 +53,11 @@ namespace Vieon.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Users.Add(user);
-                db.SaveChanges();
+                var userCreate = new UserDecorator(user, db);
+                if (userCreate.Create())
+                {
+                    return RedirectToAction("Index");
+                }
                 return RedirectToAction("Index");
             }
 
@@ -71,18 +77,7 @@ namespace Vieon.Controllers
                 return HttpNotFound();
             }
 
-            ThanhToan thanhToan = db.ThanhToans.FirstOrDefault(t => t.ID_User == id);
-            if (user.RoleUser != "Admin")
-            {
-                if (thanhToan == null)
-                {
-                    user.RoleUser = "User";
-                }
-                else
-                {
-                    user.RoleUser = "Vip";
-                }
-            }
+           
 
             return View(user);
         }
@@ -96,24 +91,12 @@ namespace Vieon.Controllers
         {
             if (ModelState.IsValid)
             {
-                ThanhToan thanhToan = db.ThanhToans.FirstOrDefault(t => t.ID_User == user.ID_User);
-
-                if (user.RoleUser != "Admin")
+                var userEdit = new UserDecorator(user, db);
+                if(userEdit.Edit())
                 {
-                    if (thanhToan == null)
-                    {
-                        user.RoleUser = "User";
-                    }
-                    else
-                    {
-                        user.RoleUser = "Vip";
-                    }
+                    return RedirectToAction("Index");
                 }
-
-                db.Entry(user).State = EntityState.Modified;
-                db.SaveChanges();
-
-                return RedirectToAction("Index");
+             
             }
             return View(user);
         }
@@ -121,7 +104,9 @@ namespace Vieon.Controllers
         // GET: Users/Delete/5
         public ActionResult Delete(int? id)
         {
-            if (id == null)
+            var userDelete = new UserDecorator(db);
+
+            if (!userDelete.Delete(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -138,9 +123,16 @@ namespace Vieon.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            User user = db.Users.Find(id);
-            db.Users.Remove(user);
-            db.SaveChanges();
+            try
+            {
+                var userDeleteConfirm = new UserDecorator(db);
+                if (userDeleteConfirm.DeleteConfirm(id))
+                    return RedirectToAction("Index");
+            }
+            catch
+            {
+                return Content("<script>alert('ID không tồn tại')</script>");    
+            }
             return RedirectToAction("Index");
         }
 

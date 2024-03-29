@@ -134,6 +134,12 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\BinhLuansController.cs" />
     <Compile Include="Controllers\DaoDiensController.cs" />
+    <Compile Include="Controllers\Design Pattern\Decorator\DaoDienDecorator.cs" />
+    <Compile Include="Controllers\Design Pattern\Decorator\IUser.cs" />
+    <Compile Include="Controllers\Design Pattern\Decorator\UserDecorator.cs" />
+    <Compile Include="Controllers\Design Pattern\Proxy\IUserProxy.cs" />
+    <Compile Include="Controllers\Design Pattern\Proxy\UserProxy.cs" />
+    <Compile Include="Controllers\Design Pattern\TemplateMethod\TemplateMethod.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MuaGoiVipController.cs" />
     <Compile Include="Controllers\NguoiDungController.cs" />
@@ -145,7 +151,7 @@
     <Compile Include="Controllers\TapPhimsController.cs" />
     <Compile Include="Controllers\ThanhToansController.cs" />
     <Compile Include="Controllers\TheLoaisController.cs" />
-    <Compile Include="Controllers\UserKhachsController.cs" />
+    <Compile Include="Controllers\UserKhachs.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

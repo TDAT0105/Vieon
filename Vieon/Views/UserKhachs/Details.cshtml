@@ -5,6 +5,9 @@
     Layout = "~/Views/Shared/ChiTiet.cshtml";
 }
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
 <style>
     .vertical-scroll-container {
         overflow-y: scroll;
@@ -40,7 +43,14 @@
             <strong>Số điện thoại:</strong> @Html.DisplayFor(model => model.SDT)
             <br />
             <br />
-            <strong>Mật khẩu:</strong> @Html.DisplayFor(model => model.MatKhau)
+            <span id="password-container">
+                <strong>Mật khẩu:</strong>
+                <span id="password-value" data-password="@Model.MatKhau">******</span>
+                <br />
+                <a href="#" id="show-hide-password">Hiện</a>
+            </span>
+
+
         </div>
     </div>
     <br />
@@ -55,3 +65,24 @@
         }
     </p>
 </div>
+
+<script>
+    $(document).ready(function () {
+        $('#show-hide-password').click(function (e) {
+            e.preventDefault();
+            var passwordContainer = $('#password-container');
+            var passwordValue = $('#password-value');
+            var linkText = $(this).text();
+            var dataPassword = passwordValue.data('password'); // Lấy mật khẩu từ thuộc tính dữ liệu
+
+            if (linkText === 'Hiện') {
+                passwordValue.text(dataPassword);
+                $(this).text('Ẩn');
+            } else {
+                passwordValue.text('******');
+                $(this).text('Hiện');
+            }
+        });
+    });
+</script>
+

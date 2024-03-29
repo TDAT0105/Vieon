@@ -55,9 +55,16 @@ namespace Vieon.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Phims.Add(phim);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                try
+                {
+                    db.Phims.Add(phim);
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                catch
+                {
+                    ModelState.AddModelError(string.Empty, "Thông tin sai");
+                }
             }
 
             return View(phim);

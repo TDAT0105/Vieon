@@ -6,23 +6,24 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Vieon.Controllers.Design_Pattern;
 using Vieon.Models;
 
 namespace Vieon.Controllers
 {
-    public class Phim_DaoDienController : Controller
+    public class Phim_DaoDienController : TemplateMethod<Phim_DaoDien>
     {
         private VieONVipProEntities db = new VieONVipProEntities();
 
         // GET: Phim_DaoDien
-        public ActionResult Index()
+        public override ActionResult Index()
         {
-            var phim_DaoDien = db.Phim_DaoDien.Include(p => p.DaoDien).Include(p => p.Phim);
+            var phim_DaoDien = db.Phim_DaoDien.Include(p => p.Phim).Include(p => p.DaoDien);
             return View(phim_DaoDien.ToList());
         }
 
         // GET: Phim_DaoDien/Details/5
-        public ActionResult Details(int? id)
+        public override ActionResult Details(int? id)
         {
             if (id == null)
             {
@@ -37,7 +38,7 @@ namespace Vieon.Controllers
         }
 
         // GET: Phim_DaoDien/Create
-        public ActionResult Create()
+        public override ActionResult Create()
         {
             ViewBag.ID_DaoDien = new SelectList(db.DaoDiens, "ID_DaoDien", "TenDaoDien");
             ViewBag.ID_Phim = new SelectList(db.Phims, "ID_Phim", "TenPhim");
@@ -49,7 +50,7 @@ namespace Vieon.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID_Phim_DaoDien,ID_Phim,ID_DaoDien,VaiTro")] Phim_DaoDien phim_DaoDien)
+        public virtual ActionResult Create([Bind(Include = "ID_Phim_DaoDien,ID_Phim,ID_DaoDien,VaiTro")] Phim_DaoDien phim_DaoDien)
         {
             if (ModelState.IsValid)
             {
@@ -64,7 +65,7 @@ namespace Vieon.Controllers
         }
 
         // GET: Phim_DaoDien/Edit/5
-        public ActionResult Edit(int? id)
+        public override ActionResult Edit(int? id)
         {
             if (id == null)
             {
@@ -85,7 +86,7 @@ namespace Vieon.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID_Phim_DaoDien,ID_Phim,ID_DaoDien,VaiTro")] Phim_DaoDien phim_DaoDien)
+        public virtual ActionResult Edit([Bind(Include = "ID_Phim_DaoDien,ID_Phim,ID_DaoDien,VaiTro")] Phim_DaoDien phim_DaoDien)
         {
             if (ModelState.IsValid)
             {
@@ -99,7 +100,7 @@ namespace Vieon.Controllers
         }
 
         // GET: Phim_DaoDien/Delete/5
-        public ActionResult Delete(int? id)
+        public override ActionResult Delete(int? id)
         {
             if (id == null)
             {
@@ -116,7 +117,7 @@ namespace Vieon.Controllers
         // POST: Phim_DaoDien/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public override ActionResult DeleteConfirmed(int id)
         {
             Phim_DaoDien phim_DaoDien = db.Phim_DaoDien.Find(id);
             int? idPhim = phim_DaoDien.ID_Phim;

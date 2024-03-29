@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Vieon.Controllers.Design_Pattern.Decorator;
 using Vieon.Models;
 
 namespace Vieon.Controllers
@@ -23,7 +24,8 @@ namespace Vieon.Controllers
         // GET: DaoDiens/Details/5
         public ActionResult Details(int? id)
         {
-            if (id == null)
+            var daodienDetail = new DaoDienDecorator(db);
+            if (!daodienDetail.Details(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -82,9 +84,15 @@ namespace Vieon.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(daoDien).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                var daodienEdit = new DaoDienDecorator(db, daoDien.TenDaoDien, daoDien);
+                if (daodienEdit.Edit())
+                {
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    return Content("<script>alert('Có lỗi đã xảy ra')</script>");
+                }
             }
             return View(daoDien);
         }
@@ -92,7 +100,8 @@ namespace Vieon.Controllers
         // GET: DaoDiens/Delete/5
         public ActionResult Delete(int? id)
         {
-            if (id == null)
+            var deleteDaodien = new DaoDienDecorator(db);
+            if (!deleteDaodien.Delete(id))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
@@ -109,9 +118,16 @@ namespace Vieon.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            DaoDien daoDien = db.DaoDiens.Find(id);
-            db.DaoDiens.Remove(daoDien);
-            db.SaveChanges();
+            try
+            {
+                var daodienDeleteConfirm = new DaoDienDecorator(db);
+                if (daodienDeleteConfirm.DeleteConfirm(id))
+                    return RedirectToAction("Index");
+            }
+            catch
+            {
+                return Content("<script>alert('ID không tồn tại')</script>");
+            }
             return RedirectToAction("Index");
         }
 

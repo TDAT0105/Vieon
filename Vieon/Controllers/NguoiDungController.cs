@@ -81,64 +81,122 @@ namespace Vieon.Controllers
         [HttpPost]
         public ActionResult DangKy(User us)
         {
-            if (ModelState.IsValid)
+            List<string> errorMessages = new List<string>();
+
+            try
             {
-                us.RoleUser = "User";
-                var regexName = new Regex(@"^[a-zA-ZÀÁẠÃÄÂÈÉẸÊẼÌÍĨỊÒÓỌÕÔƠÙÚŨƯỶÝỴÂĐ]+$");
-                if (!regexName.IsMatch(us.HoTen))
-                {
-                    ModelState.AddModelError(string.Empty, "Họ tên chỉ được bao gồm chữ cái và dấu");
-                }
-                if (us.HoTen.Length > 50)
-                {
-                    ModelState.AddModelError(string.Empty, "Họ tên không được dài quá 50 ký tự");
-                }
-
-                if (!string.IsNullOrEmpty(us.SDT))
-                {
-                    var regex = new Regex(@"^[0-9]+$");
-                    if (!regex.IsMatch(us.SDT))
-                    {
-                        ModelState.AddModelError(string.Empty, "Số điện thoại chỉ được bao gồm số");
-                    }
-                }
-                if (us.SDT.Length != 10 && us.SDT.Length != 11)
-                {
-                    ModelState.AddModelError(string.Empty, "Số điện thoại phải có 10 số");
-                }
-                if (string.IsNullOrEmpty(us.MatKhau))
-                {
-                    ModelState.AddModelError(string.Empty, "Mật khẩu không được để trống");
-                }
-                if (string.IsNullOrEmpty(us.Email))
-                {
-                    ModelState.AddModelError(string.Empty, "Email không được để trống");
-                }
-                var khachhang = db.Users.FirstOrDefault(k => k.SDT == us.SDT);
-                if (khachhang != null)
-                {
-                    ModelState.AddModelError(string.Empty, "Số điện thoại này đã được đăng kí");
-                }
-                var khachhangEmail = db.Users.FirstOrDefault(k => k.Email == us.Email);
-                if (khachhangEmail != null)
-                {
-                    ModelState.AddModelError(string.Empty, "Email này đã được đăng kí");
-                }
-
                 if (ModelState.IsValid)
                 {
                     us.RoleUser = "User";
-                    us.HoTen.ToUpper();
-                    db.Users.Add(us);
-                    db.SaveChanges();
-                }
-                else
-                {
-                    return View();
+
+                    // Kiểm tra Họ tên
+                    if (string.IsNullOrWhiteSpace(us.HoTen))
+                    {
+                        errorMessages.Add("Tên không hợp lệ");
+                    }
+                    var regexName = new Regex(@"^[a-zA-ZÀÁẠÃÄÂÈÉẸÊẼÌÍĨỊÒÓỌÕÔƠÙÚŨƯỶÝỴÂĐ\s]+$");
+                    if (!regexName.IsMatch(us.HoTen))
+                    {
+                        errorMessages.Add("Họ tên chỉ được bao gồm chữ cái và dấu");
+                    }
+                    else if (us.HoTen.Length > 50)
+                    {
+                        errorMessages.Add("Họ tên không được dài quá 50 ký tự");
+                    }
+                    else if (us.HoTen.Length < 6)
+                    {
+                        errorMessages.Add("Họ tên không được ngắn hơn 6 ký tự");
+                    }
+                    // Kiểm tra Số điện thoại
+                    if (string.IsNullOrWhiteSpace(us.SDT))
+                    {
+                        errorMessages.Add("Số điện thoại không được để trống");
+                    }
+
+                    else
+                    {
+                        var regex = new Regex(@"^[0-9]+$");
+                        if (!regex.IsMatch(us.SDT))
+                        {
+                            errorMessages.Add("Số điện thoại chỉ được bao gồm số");
+                        }
+
+                        if (us.SDT.Length != 10 && us.SDT.Length != 11)
+                        {
+                            errorMessages.Add("Số điện thoại phải có 10 hoặc 11 số");
+                        }
+                    }
+
+                    // Kiểm tra Mật khẩu
+                    if (string.IsNullOrWhiteSpace(us.MatKhau))
+                    {
+                        errorMessages.Add("Mật khẩu không được để trống");
+                    }
+
+                    else if (us.MatKhau.Length < 6)
+                    {
+                        errorMessages.Add("Mật khẩu phải có ít nhất 6 kí tự");
+                    }
+
+                    // Kiểm tra Email
+                    if (string.IsNullOrWhiteSpace(us.Email))
+                    {
+                        errorMessages.Add("Email không được để trống");
+                    }
+
+                    else
+                    {
+                        var regexEmail = new Regex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+                        if (!regexEmail.IsMatch(us.Email))
+                        {
+                            errorMessages.Add("Email không hợp lệ");
+                        }
+                    }
+
+                    // Kiểm tra trùng lặp số điện thoại và email
+                    var khachhang = db.Users.FirstOrDefault(k => k.SDT == us.SDT);
+                    if (khachhang != null)
+                    {
+                        errorMessages.Add("Số điện thoại này đã được đăng kí");
+                    }
+                    var khachhangEmail = db.Users.FirstOrDefault(k => k.Email == us.Email);
+                    if (khachhangEmail != null)
+                    {
+                        errorMessages.Add("Email này đã được đăng kí");
+                    }
+
+                    // Nếu không có lỗi, thêm người dùng vào cơ sở dữ liệu
+                    if (errorMessages.Count == 0)
+                    {
+                        us.HoTen = us.HoTen.ToUpper();
+                        db.Users.Add(us);
+                        db.SaveChanges();
+
+                        ViewBag.SuccessMessage = "Đăng ký thành công";
+                    }
                 }
             }
-            return RedirectToAction("DangNhap");
+            catch (Exception ex)
+            {
+                // Xử lý ngoại lệ, ví dụ: log thông báo lỗi hoặc thông báo cho người dùng
+                errorMessages.Add("Không được để trống thông tin ");
+            }
+
+            ViewBag.ErrorMessages = errorMessages;
+
+            // Chỉ hiển thị thông báo chung khi có ít nhất hai lỗi
+            if (errorMessages.Count >= 2)
+            {
+                ViewBag.InvalidInput = true;
+            }
+
+            return View();
         }
+
+
+
+
+
         public ActionResult DangXuat()
         {
             Session["ID"] = "";
